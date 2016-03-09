@@ -3,7 +3,6 @@
 * 多URL配置
 * API json schema 验证（Joi@6.10.1）
 * 多中间件配置
-express-magic-route
 
 ---
 
