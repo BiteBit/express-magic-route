@@ -45,15 +45,10 @@ applyRoute = (routeConfig)->
   if _.isString routeConfig.middleware
     routeConfig.middleware = [routeConfig.middleware]
 
-  innerMiddlewareSetted = false
-  for url in routeConfig.url
-    if _.isFunction(routeConfig.schema) and !innerMiddlewareSetted
-      if routeConfig.enableCsruf
-        applyMiddleware url, routeConfig.method, csrfProtection
-
-      applyMiddleware url, routeConfig.method, schemaValidMiddleware(routeConfig.schema, routeConfig.schemaValidatePos, routeConfig.errorCode)
-
-      innerMiddlewareSetted = true
+  for url, index in routeConfig.url
+    if index == 0
+      applyMiddleware url, routeConfig.method, csrfProtection if routeConfig.enableCsruf
+      applyMiddleware url, routeConfig.method, schemaValidMiddleware(routeConfig.schema, routeConfig.schemaValidatePos, routeConfig.errorCode) if _.isFunction(routeConfig.schema)
 
     applyMiddleware url, routeConfig.method, routeConfig.middleware
 
