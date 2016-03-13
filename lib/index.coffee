@@ -18,8 +18,13 @@ init = (routerConfigs)->
   for route in routerConfigs
     applyRoute route
 
-schemaValidMiddleware = (schema, schemaValidatePos = 'query', errorCode = '-10001')->
+schemaValidMiddleware = (schema, schemaValidatePos, errorCode = '-10001')->
   return (req, res, next)->
+    if !schemaValidatePos && req.method.toLowerCase() == 'get'
+      schemaValidatePos = 'query'
+    else if !schemaValidatePos && req.method.toLowerCase() == 'post'
+      schemaValidatePos = 'body'
+
     validRet = Joi.validate(req[schemaValidatePos], schema(req, Joi), allowUnknown: true)
     if validRet?.error
       res.status(400).send MagicRoute.ErrorFormater(errorCode, validRet.error)
@@ -36,7 +41,7 @@ applyRoute = (routeConfig)->
 
   routeConfig.method ?= 'get'
   routeConfig.method = routeConfig.method.toLowerCase()
-  routeConfig.schemaValidatePos ?= 'query'
+  routeConfig.schemaValidatePos = routeConfig.schemaValidatePos
   routeConfig.enableCsruf ?= true
   routeConfig.disable ?= false
 
