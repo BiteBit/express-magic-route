@@ -1,9 +1,7 @@
 _ = require('lodash')
 Joi = require('joi')
 express = require('express')
-csrf = require('csurf')
 
-csrfProtection = csrf({cookie: true})
 Router = express.Router()
 
 ErrorFormater = (code, descs)->
@@ -18,14 +16,14 @@ init = (routerConfigs)->
   for route in routerConfigs
     applyRoute route
 
-schemaValidMiddleware = (schema, schemaValidatePos, errorCode = '-10001')->
+schemaValidMiddleware = (schema, where, errorCode = '-10001')->
   return (req, res, next)->
-    if !schemaValidatePos && req.method.toLowerCase() == 'get'
-      schemaValidatePos = 'query'
-    else if !schemaValidatePos && req.method.toLowerCase() == 'post'
-      schemaValidatePos = 'body'
+    if !where && req.method.toLowerCase() == 'get'
+      where = 'query'
+    else if !where && req.method.toLowerCase() == 'post'
+      where = 'body'
 
-    validRet = Joi.validate(req[schemaValidatePos], schema(req, Joi), allowUnknown: true)
+    validRet = Joi.validate(req[where], schema(req, Joi), allowUnknown: true)
     if validRet?.error
       res.status(400).send MagicRoute.ErrorFormater(errorCode, validRet.error)
       return
@@ -41,7 +39,7 @@ applyRoute = (routeConfig)->
 
   routeConfig.method ?= 'get'
   routeConfig.method = routeConfig.method.toLowerCase()
-  routeConfig.schemaValidatePos = routeConfig.schemaValidatePos
+  routeConfig.where = routeConfig.where
   routeConfig.enableCsruf ?= true
   routeConfig.disable ?= false
 
@@ -52,8 +50,7 @@ applyRoute = (routeConfig)->
 
   for url, index in routeConfig.url
     if index == 0
-      applyMiddleware url, routeConfig.method, csrfProtection if routeConfig.enableCsruf
-      applyMiddleware url, routeConfig.method, schemaValidMiddleware(routeConfig.schema, routeConfig.schemaValidatePos, routeConfig.errorCode) if _.isFunction(routeConfig.schema)
+      applyMiddleware url, routeConfig.method, schemaValidMiddleware(routeConfig.schema, routeConfig.where, routeConfig.errorCode) if _.isFunction(routeConfig.schema)
 
     applyMiddleware url, routeConfig.method, routeConfig.middleware
 

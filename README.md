@@ -32,15 +32,12 @@ middleware
     function(req, res, next)    单个中间件处理该url/[url]
     [function(req, res, next)]  多个中间件按照顺序处理url/[url]
    
-schemaValidatePos               验证表单的schema req的属性
-    string                      [query, body, params] 默认query
-
 schema                          验证表单的schema
     function(req, joi)          joi数据验证，验证错误时返回http 400错误
                                 验证失败时返回{error_no, error_desc}
 
-enableCsruf                     是否启用 csruf cookie,需要先引入cookie-parser 
-    boolean                     默认为true
+where                           验证表单的schema req的属性
+    string                      [query, body] 默认query
 
 disable                         是否停用路由
     boolean                     默认为false
